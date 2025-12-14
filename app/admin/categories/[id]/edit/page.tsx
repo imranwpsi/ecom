@@ -11,9 +11,10 @@ import { CategoryForm } from "../../category-form"
 export default async function EditCategoryPage({
     params,
 }: {
-    params: { id: string }
+    params: Promise<{ id: string }>
 }) {
-    const id = parseInt(params.id)
+    const { id: paramId } = await params
+    const id = parseInt(paramId)
     const result = await getCategoryById(id)
 
     if (!result.success || !result.data) {
