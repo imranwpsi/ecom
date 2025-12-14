@@ -4,9 +4,9 @@ import {
     SidebarInset,
     SidebarProvider,
 } from "@/components/ui/sidebar"
-import { CategoryForm } from "../../category-form"
 import { getCategoryById } from "../../actions"
 import { notFound } from "next/navigation"
+import { CategoryForm } from "../../category-form"
 
 export default async function EditCategoryPage({
     params,

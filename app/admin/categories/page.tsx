@@ -15,8 +15,8 @@ import {
 } from "@/components/ui/table"
 import { getCategories } from "./actions"
 import Link from "next/link"
-import { DeleteCategoryButton } from "./delete-category-button"
 import Image from "next/image"
+import { DeleteCategoryButton } from "./delete-category-button"
 
 export default async function CategoriesPage() {
     const result = await getCategories()
