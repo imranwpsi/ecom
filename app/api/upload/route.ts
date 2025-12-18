@@ -6,6 +6,7 @@ export async function POST(request: NextRequest) {
     try {
         const formData = await request.formData()
         const file = formData.get("file") as File | null
+        const folder = formData.get("folder") as string | "common";
 
         if (!file) {
             return NextResponse.json(
@@ -39,17 +40,17 @@ export async function POST(request: NextRequest) {
         const timestamp = Date.now()
         const random = Math.random().toString(36).substring(7)
         const ext = file.name.split(".").pop()
-        const filename = `category-${timestamp}-${random}.${ext}`
+        const filename = `${timestamp}-${random}.${ext}`
 
         // Save to public/uploads directory
-        const uploadsDir = join(process.cwd(), "public", "uploads", "categories")
+        const uploadsDir = join(process.cwd(), "public", "uploads", folder)
         const filepath = join(uploadsDir, filename)
 
         // Create directory if it doesn't exist
         await writeFile(filepath, buffer)
 
         // Return the public URL
-        const url = `/uploads/categories/${filename}`
+        const url = `/uploads/${folder}/${filename}`
 
         return NextResponse.json({
             success: true,
