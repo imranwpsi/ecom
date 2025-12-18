@@ -110,6 +110,7 @@ export function CategoryForm({ category }: CategoryFormProps) {
                         />
                     </div>
                     <ImageUpload
+                        label="Category Image"
                         value={category?.image || ""}
                         disabled={isSubmitting || isUploading}
                         onFileSelected={(file) => setFile(file)}
