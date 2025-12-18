@@ -1,0 +1,42 @@
+import type { Metadata } from 'next';
+import { Inter, Poppins } from 'next/font/google';
+import '../globals.css';
+import { Toaster } from '@/components/ui/sonner';
+import Header from '@/components/shared/Header';
+import Footer from '@/components/shared/Footer';
+
+const inter = Inter({
+  subsets: ['latin'],
+  weight: ['400', '600', '700'],
+  variable: '--font-inter',
+  display: 'swap',
+});
+
+const poppins = Poppins({
+  subsets: ['latin'],
+  weight: ['400'],
+  variable: '--font-poppins',
+  display: 'swap',
+});
+
+export const metadata: Metadata = {
+  title: 'CatShop - Premium Caps & Accessories',
+  description: 'Discover the finest collection of premium caps and accessories. Quality meets style in every piece. Shop baseball caps, beanies, trucker caps, and more.',
+};
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html lang="en" suppressHydrationWarning>
+      <body className={`${inter.variable} ${poppins.variable} antialiased`}>
+        <Header />
+        {children}
+        <Footer />
+        <Toaster />
+      </body>
+    </html>
+  );
+}

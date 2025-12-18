@@ -1,4 +1,7 @@
 import Image from 'next/image';
+import Link from 'next/link';
+import { RiArrowRightUpLine } from 'react-icons/ri';
+import { BiSolidOffer } from "react-icons/bi";
 
 export default function TrendingNow() {
     const products = [
@@ -48,23 +51,17 @@ export default function TrendingNow() {
 
     return (
         <section className="w-full max-w-[1737px] mx-auto px-4 sm:px-6 lg:px-4">
-            {/* Section Header */}
+           {/* Section Header */}
             <div className="mb-8 sm:mb-10 md:mb-12 lg:mb-14 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
                 <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900">
                     Trending Now
                 </h2>
-                <a
-                    href="#"
-                    className="text-xs sm:text-sm font-extrabold tracking-wide uppercase text-gray-500 hover:text-gray-900 transition-colors duration-200 inline-flex items-center gap-1.5 group"
-                >
-                    See all product
-                    <span
-                        aria-hidden="true"
-                        className="text-sm transform group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform duration-200"
-                    >
-                        ↗
-                    </span>
-                </a>
+                <div className="all-products underline">
+                    <Link href="#" className="text-xs sm:text-sm font-extrabold tracking-wide uppercase text-gray-900  hover:text-gray-700 transition-colors duration-200 flex items-center group">
+                        See All Product
+                        <RiArrowRightUpLine size={20}/>
+                    </Link>
+                </div>  
             </div>
 
             {/* Grid */}
@@ -86,8 +83,8 @@ export default function TrendingNow() {
                             </figure>
                             <div className="col-span-12 md:col-span-7 p-5 sm:p-6 md:p-7 xl:p-8 flex flex-col">
                                 {/* 20% OFF Badge */}
-                                <div className="inline-flex items-center justify-center bg-gray-900 text-white px-4 py-2 mb-4 self-start">
-                                    <span className="text-lg font-bold">20% OFF</span>
+                                <div className="bg-gray-900 text-white px-4 py-2 mb-4 self-start">
+                                    <span className="flex items-center gap-1 text-lg font-bold"><BiSolidOffer />20% OFF</span>
                                 </div>
 
                                 <div className="mt-5 w-full text-gray-900 text-xl font-semibold font-['Inter'] leading-7">

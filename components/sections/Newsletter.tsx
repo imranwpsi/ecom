@@ -40,13 +40,13 @@ export default function Newsletter() {
                                         placeholder="Enter your email address"
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}
-                                        className="h-14 sm:h-14 w-full bg-white/10 backdrop-blur-sm text-white placeholder-white/60 border-2 border-white/30 focus:border-white focus:bg-white/15 focus:outline-none focus:ring-0 rounded-lg px-5 text-base transition-all duration-300"
+                                        className="h-14 sm:h-14 w-full bg-white/10 backdrop-blur-sm text-white placeholder-white/60 border-2 border-white/30 focus:border-white focus:bg-white/15 focus:outline-none focus:ring-0  px-5 text-base transition-all duration-300"
                                         required
                                     />
                                 </div>
                                 <button
                                     type="submit"
-                                    className="h-14 sm:h-14 shrink-0 bg-white text-[#0e1523] hover:bg-gray-100 hover:shadow-xl active:scale-95 transition-all duration-300 px-8 sm:px-10 font-bold uppercase tracking-wide text-sm sm:text-base whitespace-nowrap rounded-lg"
+                                    className="h-14 sm:h-14 shrink-0 bg-white text-[#0e1523] hover:bg-gray-100 hover:shadow-xl active:scale-95 transition-all duration-300 px-8 sm:px-10 font-bold uppercase tracking-wide text-sm sm:text-base whitespace-nowrap"
                                 >
                                     Subscribe
                                 </button>
@@ -59,7 +59,7 @@ export default function Newsletter() {
                                     type="checkbox"
                                     checked={agreed}
                                     onChange={(e) => setAgreed(e.target.checked)}
-                                    className="h-5 w-5 mt-0.5 accent-white border-2 border-white/50 rounded cursor-pointer flex-shrink-0"
+                                    className="h-5 w-5 mt-0.5 bg-gray-900 border-2 border-white cursor-pointer shrink-0"
                                     required
                                 />
                                 <label htmlFor="agree" className="text-sm sm:text-sm md:text-base text-slate-300 leading-relaxed cursor-pointer">

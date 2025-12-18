@@ -1,4 +1,5 @@
 import Image from 'next/image';
+import Link from 'next/link';
 
 export default function HeroTwo() {
     return (
@@ -15,7 +16,7 @@ export default function HeroTwo() {
                 </div>
 
                 {/* RIGHT PANEL - Content */}
-                <div className="px-6 py-12 sm:px-8 sm:py-16 md:px-12 md:py-20 lg:px-16 xl:px-24 my-12 flex flex-col justify-center order-2 md:order-2 bg-[#1a1f2e] text-white">
+                <div className="px-6 py-12 sm:px-8 sm:py-16 md:px-12 md:py-20 lg:px-16 xl:px-24 my-12 flex flex-col justify-center order-2 md:order-2 bg-gray-900 text-white">
                     <div className="max-w-xl w-full">
                         <h2 className="text-white text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold leading-tight mb-6">
                             Your Trusted Building<br />
@@ -29,9 +30,9 @@ export default function HeroTwo() {
                         </p>
 
                         <div>
-                            <button className="bg-white text-gray-900 px-8 py-3 text-sm font-bold uppercase tracking-wider hover:bg-gray-100 transition-all duration-200 shadow-lg hover:shadow-xl">
+                            <Link href="#" className="bg-white text-gray-900 px-8 py-3 text-sm font-bold uppercase tracking-wider hover:bg-gray-100 transition-all duration-200 shadow-lg hover:shadow-xl">
                                 SHOP NOW
-                            </button>
+                            </Link>
                         </div>
                     </div>
                 </div>
