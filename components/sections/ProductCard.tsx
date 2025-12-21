@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { Product } from '@/app/generated/prisma/client';
 import { useAppDispatch } from '@/store/hooks';
 import { addToCart } from '@/store/cartSlice';
-import Router from 'next/router';
+import { useRouter } from 'next/navigation';
 
 interface ProductCardProps {
     product: Product;
@@ -14,11 +14,12 @@ interface ProductCardProps {
 
 export default function ProductCard({ product, variant = 'grid' }: ProductCardProps) {
     const dispatch = useAppDispatch()
+    const router = useRouter()
 
     if (variant === 'best-deals') {
         return (
             <div className="group bg-white overflow-visible shadow-md transition-shadow duration-300">
-                <div className='cursor-pointer' onClick={() => Router.push(`/products/${product.id}`)}>
+                <div className='cursor-pointer' onClick={() => router.push(`/products/${product.id}`)}>
                     <div className="relative overflow-hidden">
                         {/* {product.badge && (
                             <div className="absolute top-3 left-3 bg-black text-white px-2 py-1 text-xs font-bold z-10">
@@ -71,7 +72,7 @@ export default function ProductCard({ product, variant = 'grid' }: ProductCardPr
     else if (variant === 'best-ShopOne') {
         return (
             <div className="group pb-4 sm:pb-6 lg:pb-10">
-                <div className='cursor-pointer' onClick={() => Router.push(`/products/${product.id}`)}>
+                <div className='cursor-pointer' onClick={() => router.push(`/products/${product.id}`)}>
                     <div className="relative overflow-hidden">
                         {/* {product.badge && (
                             <span className="absolute top-3 left-3 bg-black/80 text-white text-xs font-semibold px-3 py-1.5 tracking-wider z-10">
@@ -121,7 +122,7 @@ export default function ProductCard({ product, variant = 'grid' }: ProductCardPr
     }
     return (
         <div className="group pb-20 sm:pb-6 lg:pb-10">
-            <div className='cursor-pointer' onClick={() => Router.push(`/products/${product.id}`)}>
+            <div className='cursor-pointer' onClick={() => router.push(`/products/${product.id}`)}>
                 <div className="relative overflow-hidden h-full">
                     {/* {product.badge && (
                         <span className="absolute top-3 left-3 bg-black/80 text-white text-xs font-semibold px-3 py-1.5 tracking-wider z-10">

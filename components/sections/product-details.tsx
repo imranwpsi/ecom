@@ -7,8 +7,11 @@ import { FiChevronUp, FiChevronDown } from "react-icons/fi";
 import { AiFillStar as Star } from "react-icons/ai";
 import Image from "next/image";
 import { Product } from "@/app/generated/prisma/client";
+import { useAppDispatch } from "@/store/hooks";
+import { addToCartWithQty } from "@/store/cartSlice";
 
 const ProductDetails = ({ product }: { product: Product }) => {
+    const dispatch = useAppDispatch();
     const [open, setOpen] = useState(true);
     const [openReviews, setOpenReviews] = useState(true);
     const [openShipping, setOpenShipping] = useState(false);
@@ -173,7 +176,10 @@ const ProductDetails = ({ product }: { product: Product }) => {
                                 </button>
                             </div>
 
-                            <button className="flex-1 text-sm sm:text-lg bg-white text-gray-700 py-3 border font-semibold">
+                            <button
+                                onClick={() => dispatch(addToCartWithQty({ product, quantity: qty }))}
+                                className="flex-1 text-sm sm:text-lg bg-white text-gray-700 py-3 border font-semibold hover:bg-gray-100 transition-colors"
+                            >
                                 ADD TO CART
                             </button>
 
