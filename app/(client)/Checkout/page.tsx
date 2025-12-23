@@ -1,15 +1,28 @@
 "use client";
-import { useState } from "react";
+import type { ChangeEvent } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { steps } from "@/components/shared/steps";
 import ShoppingStep from "@/components/shared/ShoppingStep";
 import { IoIosArrowDown } from "react-icons/io";
 import { GiReturnArrow } from "react-icons/gi";
 import { MdOutlinePrivacyTip } from "react-icons/md";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { setCart } from "@/store/cartSlice";
+import { useToast } from "@/hooks/use-toast";
 
-const author = [
-    "/assets/image/product/cap-6.jpg",
-];
+type CheckoutFormState = {
+    fullName: string
+    email: string
+    phone: string
+    addressLine1: string
+    addressLine2: string
+    city: string
+    postalCode: string
+    note: string
+}
+
 const images = [
     "/assets/image/payment/AMEX.webp",
     "/assets/image/payment/Bkash.webp",
@@ -25,45 +38,172 @@ const shippingOptions = [
     { label: "Inside Dhaka", price: 60 },
     { label: "Express Delivery (Dhaka Only)", price: 150 }
 ];
+const checkoutSelectionKey = "checkoutSelection";
 
 export default function Checkout() {
-  // Sample Ordered Items
-  const [items] = useState([
-    {
-      id: 1,
-      title: "New York Yankees Essential Black Cap",
-      color: "Brown",
-      size: "Free Size",
-      qty: 2,
-      price: 28846,
-      img: "/assets/image/best-deal/best-deal-1.png",
-    },
-    {
-      id: 2,
-      title: "New York Yankees Essential Black Cap",
-      color: "Brown",
-      size: "Free Size",
-      qty: 2,
-      price: 28846,
-      img: "/assets/image/best-deal/best-deal-2.png",
-    },
-    {
-      id: 3,
-      title: "New York Yankees Essential Black Cap",
-      color: "Brown",
-      size: "Free Size",
-      qty: 2,
-      price: 28846,
-      img: "/assets/image/best-deal/best-deal-3.png",
-    },
-  ]);
-
-  const subtotal = items.reduce((sum, i) => sum + i.price * i.qty, 0);
+  const dispatch = useAppDispatch();
+  const { toast } = useToast();
+  const cartItems = useAppSelector((state) => state.cart.items);
 
   const [open, setOpen] = useState(false);
   const [shippingSelected, setShippingSelected] = useState(shippingOptions[0]);
-  const [paymentMethod, setPaymentMethod] = useState("online");
+  const [paymentMethod, setPaymentMethod] = useState<"online" | "cod">("online");
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [orderId, setOrderId] = useState<number | null>(null);
+  const [selectedIds, setSelectedIds] = useState<number[] | null>(null);
+  const [formData, setFormData] = useState<CheckoutFormState>({
+    fullName: "",
+    email: "",
+    phone: "",
+    addressLine1: "",
+    addressLine2: "",
+    city: "",
+    postalCode: "",
+    note: "",
+  });
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const stored = localStorage.getItem(checkoutSelectionKey);
+    if (!stored) return;
+    try {
+      const parsed = JSON.parse(stored);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        const ids = parsed.filter((id) => typeof id === "number");
+        if (ids.length > 0) setSelectedIds(ids);
+      }
+    } catch {
+      // Ignore invalid stored selection
+    }
+  }, []);
+
+  const checkoutItems = useMemo(() => {
+    if (selectedIds && selectedIds.length > 0) {
+      const selectedSet = new Set(selectedIds);
+      return cartItems.filter((item) => selectedSet.has(item.id));
+    }
+    return cartItems;
+  }, [cartItems, selectedIds]);
+
+  const subtotal = useMemo(
+    () =>
+      checkoutItems.reduce(
+        (sum, item) => sum + Number(item.price) * item.quantity,
+        0
+      ),
+    [checkoutItems]
+  );
+
+  const shippingCost = checkoutItems.length > 0 ? shippingSelected.price : 0;
+
+  const total = useMemo(
+    () => subtotal + shippingCost,
+    [subtotal, shippingCost]
+  );
+
+  const handleChange = (
+    event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = event.target;
+    const key = name as keyof CheckoutFormState;
+    setFormData((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const handlePlaceOrder = async () => {
+    if (isSubmitting) return;
+    if (checkoutItems.length === 0) {
+      toast({
+        title: cartItems.length === 0 ? "Cart is empty" : "No items selected",
+        description:
+          cartItems.length === 0
+            ? "Add some items before placing an order."
+            : "Select items in your cart before checking out.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (
+      !formData.fullName.trim() ||
+      !formData.email.trim() ||
+      !formData.phone.trim() ||
+      !formData.addressLine1.trim() ||
+      !formData.city.trim()
+    ) {
+      toast({
+        title: "Missing details",
+        description: "Please fill in the required shipping details.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const response = await fetch("/api/orders", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          customer: {
+            fullName: formData.fullName.trim(),
+            email: formData.email.trim(),
+            phone: formData.phone.trim(),
+            addressLine1: formData.addressLine1.trim(),
+            addressLine2: formData.addressLine2.trim() || undefined,
+            city: formData.city.trim(),
+            postalCode: formData.postalCode.trim() || undefined,
+            note: formData.note.trim() || undefined,
+          },
+          items: checkoutItems.map((item) => ({
+            productId: item.id,
+            name: item.name,
+            image: item.image ?? null,
+            price: Number(item.price),
+            quantity: item.quantity,
+          })),
+          shipping: {
+            method: shippingSelected.label,
+            cost: shippingSelected.price,
+          },
+          paymentMethod,
+        }),
+      });
+
+      const data = await response.json().catch(() => null);
+
+      if (!response.ok || !data?.success) {
+        throw new Error(data?.error || "Failed to place order.");
+      }
+
+      const orderedIds = new Set(checkoutItems.map((item) => item.id));
+      const remainingItems = cartItems.filter(
+        (item) => !orderedIds.has(item.id)
+      );
+      dispatch(setCart(remainingItems));
+      if (typeof window !== "undefined") {
+        localStorage.removeItem(checkoutSelectionKey);
+      }
+      setSelectedIds(null);
+      setOrderId(data.data.orderId);
+      toast({
+        title: "Order placed",
+        description: `Your order #${data.data.orderId} has been placed.`,
+      });
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Failed to place order.";
+      toast({
+        title: "Order failed",
+        description: message,
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <main>
@@ -79,40 +219,87 @@ export default function Checkout() {
             <div className="bg-white p-6">
               <div className="flex items-center justify-between mb-4 pb-4 border-b border-slate-200">
                 <h2 className="text-xl font-semibold">Shipping & Billing</h2>
-                <button className="text-sm text-gray-900 underline font-bold">EDIT</button>
               </div>
-              {/* User Info */}
-              <div className="flex items-start gap-3 pb-4">
-                <div className="bg-gray-200 rounded-full">
-                <Image
-                    src={author[0]}
-                    alt={'Author'}
-                    width={44}
-                    height={44}
-                    className="w-12 h-12 rounded-full"
-                />
+              <div className="grid grid-cols-1 gap-4 text-sm md:grid-cols-2">
+                <div className="space-y-1">
+                  <label className="text-sm font-medium text-gray-700">
+                    Full Name
+                  </label>
+                  <input
+                    name="fullName"
+                    value={formData.fullName}
+                    onChange={handleChange}
+                    className="w-full border border-slate-200 p-3 text-sm"
+                    placeholder="Full name"
+                  />
                 </div>
-                <div className="text-sm">
-                  <p className="text-base font-bold">Didarul Islam</p>
-                  <p className="text-gray-600">+8801738 552 616, info@info.com</p>
+                <div className="space-y-1">
+                  <label className="text-sm font-medium text-gray-700">Email</label>
+                  <input
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    className="w-full border border-slate-200 p-3 text-sm"
+                    placeholder="Email address"
+                    type="email"
+                  />
                 </div>
-              </div>
-
-              {/* Address */}
-              <div className="text-sm pb-4 border-dashed border-b border-slate-300">
-                <p>
-                  <span className="font-bold"> Address:</span> Tropical Akhand Tower,
-                  House 23, Gareeb-e-Newaz Ave, Dhaka 1230, Uttara Sector 11, Dhaka -
-                  North, Dhaka
-                </p>
-              </div>
-
-              {/* Shipping Checkbox */}
-              <div className="mt-5 flex items-center gap-2">
-                <input type="checkbox" className="w-4 h-4 border-gray-500 accent-black" />
-                <label className="text-lg text-gray-700 font-semibold uppercase">
-                  SHIP TO A DIFFERENT ADDRESS?
-                </label>
+                <div className="space-y-1">
+                  <label className="text-sm font-medium text-gray-700">Phone</label>
+                  <input
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleChange}
+                    className="w-full border border-slate-200 p-3 text-sm"
+                    placeholder="Phone number"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-sm font-medium text-gray-700">City</label>
+                  <input
+                    name="city"
+                    value={formData.city}
+                    onChange={handleChange}
+                    className="w-full border border-slate-200 p-3 text-sm"
+                    placeholder="City"
+                  />
+                </div>
+                <div className="space-y-1 md:col-span-2">
+                  <label className="text-sm font-medium text-gray-700">
+                    Address Line 1
+                  </label>
+                  <input
+                    name="addressLine1"
+                    value={formData.addressLine1}
+                    onChange={handleChange}
+                    className="w-full border border-slate-200 p-3 text-sm"
+                    placeholder="Street address"
+                  />
+                </div>
+                <div className="space-y-1 md:col-span-2">
+                  <label className="text-sm font-medium text-gray-700">
+                    Address Line 2 (Optional)
+                  </label>
+                  <input
+                    name="addressLine2"
+                    value={formData.addressLine2}
+                    onChange={handleChange}
+                    className="w-full border border-slate-200 p-3 text-sm"
+                    placeholder="Apartment, suite, etc."
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-sm font-medium text-gray-700">
+                    Postal Code
+                  </label>
+                  <input
+                    name="postalCode"
+                    value={formData.postalCode}
+                    onChange={handleChange}
+                    className="w-full border border-slate-200 p-3 text-sm"
+                    placeholder="Postal code"
+                  />
+                </div>
               </div>
 
               {/* Notes */}
@@ -122,6 +309,9 @@ export default function Checkout() {
                   className="w-full border border-slate-200 p-3 text-sm"
                   placeholder="Write here ..."
                   rows={4}
+                  name="note"
+                  value={formData.note}
+                  onChange={handleChange}
                 ></textarea>
               </div>
             </div>
@@ -136,33 +326,50 @@ export default function Checkout() {
               </h2>
 
               <div className="space-y-4 max-h-80 overflow-y-auto pr-2">
-                {items.map((item) => (
-                  <div key={item.id} className="flex gap-4 border-b  border-slate-200 pb-4">
-                    <Image
-                      src={item.img}
-                      alt={item.title}
-                      width={80}
-                      height={80}
-                      className="w-20 h-20 object-cover"
-                    />
-                    <div className="flex-1 gap-1 text-sm">
-                      <p className="font-medium">
-                        {item.title} × {item.qty}
-                      </p>
-                      <p className="text-gray-600">
-                        <span className="font-bold">Color:</span> {item.color} <span className="font-bold">Size:</span> {item.size}
+                {checkoutItems.length === 0 ? (
+                  <div className="py-6 text-center text-sm text-gray-600">
+                    {cartItems.length === 0
+                      ? "Your cart is empty."
+                      : "No items selected for checkout."}{" "}
+                    <Link href="/Cart" className="font-semibold underline">
+                      Return to cart
+                    </Link>
+                  </div>
+                ) : (
+                  checkoutItems.map((item) => (
+                    <div
+                      key={item.id}
+                      className="flex gap-4 border-b  border-slate-200 pb-4"
+                    >
+                      <Image
+                        src={item.image || "/assets/image/product/cap-1.jpg"}
+                        alt={item.name}
+                        width={80}
+                        height={80}
+                        className="w-20 h-20 object-cover"
+                      />
+                      <div className="flex-1 gap-1 text-sm">
+                        <p className="font-medium">
+                          {item.name} × {item.quantity}
+                        </p>
+                        <p className="text-gray-600">
+                          <span className="font-bold">Color:</span> Default{" "}
+                          <span className="font-bold">Size:</span> Free Size
+                        </p>
+                      </div>
+                      <p className="font-medium text-sm">
+                        ৳{(Number(item.price) * item.quantity).toFixed(0)}
                       </p>
                     </div>
-                    <p className="font-medium text-sm">৳{item.price}</p>
-                  </div>
-                ))}
+                  ))
+                )}
               </div>
 
               {/* Pricing Details */}
               <div className="space-y-3 border-t border-slate-200 pt-4 text-sm font-bold">
                 <div className="flex justify-between border-b border-slate-200 pb-3">
                   <span>Subtotal</span>
-                  <span>৳{subtotal}</span>
+                  <span>৳{subtotal.toFixed(0)}</span>
                 </div>
                 <div className="Coupon-section">
                     {/* Top Row */}
@@ -203,7 +410,7 @@ export default function Checkout() {
                         </div>
 
                         {/* Price */}
-                        <span className="text-lg font-semibold">৳{shippingSelected.price}</span>
+                        <span className="text-lg font-semibold">৳{shippingCost}</span>
                     </div>
 
                     {/* Dropdown Menu */}
@@ -227,7 +434,7 @@ export default function Checkout() {
                 {/* Total */}
                 <div className="flex justify-between font-semibold text-lg pt-3">
                   <span>Total Cost</span>
-                  <span>৳{subtotal + shippingSelected.price}</span>
+                  <span>৳{total.toFixed(0)}</span>
                 </div>
               </div>
 
@@ -291,9 +498,18 @@ export default function Checkout() {
 
               {/* Confirm Order */}
               <div className="order-wrapper my-5">
-                <button className="w-full text-lg font-semibold bg-black text-white py-3">
-                  CONFIRM YOUR ORDER
+                <button
+                  onClick={handlePlaceOrder}
+                  className="w-full text-lg font-semibold bg-black text-white py-3 disabled:cursor-not-allowed disabled:opacity-60"
+                  disabled={checkoutItems.length === 0 || isSubmitting}
+                >
+                  {isSubmitting ? "PLACING ORDER..." : "CONFIRM YOUR ORDER"}
                 </button>
+                {orderId && (
+                  <div className="mt-4 rounded-md border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-700">
+                    Order placed successfully. Your order number is #{orderId}.
+                  </div>
+                )}
               </div>
               {/* Extra Info */}
             <div className="space-y-4 text-sm text-slate-600">

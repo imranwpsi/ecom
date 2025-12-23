@@ -10,7 +10,8 @@ import { GiReturnArrow } from "react-icons/gi";
 import { MdOutlinePrivacyTip } from "react-icons/md";
 import { FaRegHeart } from "react-icons/fa";
 import { IoIosArrowDown } from "react-icons/io";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useAppSelector, useAppDispatch } from "@/store/hooks";
 import { increaseQty, decreaseQty, removeFromCart } from "@/store/cartSlice";
 
@@ -33,6 +34,7 @@ const shippingOptions = [
 
 export default function Cart() {
     const dispatch = useAppDispatch();
+    const router = useRouter();
     const cartItems = useAppSelector((state) => state.cart.items);
 
     // Coupon and shipping state
@@ -40,6 +42,16 @@ export default function Cart() {
     const [shippingSelected, setShippingSelected] = useState(shippingOptions[0]);
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const [selectedItems, setSelectedItems] = useState<number[]>([]);
+    const checkoutSelectionKey = "checkoutSelection";
+
+    useEffect(() => {
+        if (selectedItems.length === 0) return;
+        const availableIds = new Set(cartItems.map((item) => item.id));
+        const nextSelected = selectedItems.filter((id) => availableIds.has(id));
+        if (nextSelected.length !== selectedItems.length) {
+            setSelectedItems(nextSelected);
+        }
+    }, [cartItems, selectedItems]);
 
     // Select All Logic
     const allSelected = cartItems.length > 0 && selectedItems.length === cartItems.length;
@@ -60,11 +72,39 @@ export default function Cart() {
         );
     };
 
-    // Summary Calculations - calculate for ALL items
-    const subtotal = cartItems.reduce(
-        (sum, item) => sum + Number(item.price) * item.quantity,
-        0
+    const selectedCartItems = useMemo(() => {
+        if (selectedItems.length === 0) return [];
+        const selectedSet = new Set(selectedItems);
+        return cartItems.filter((item) => selectedSet.has(item.id));
+    }, [cartItems, selectedItems]);
+
+    const selectedSubtotal = useMemo(
+        () =>
+            selectedCartItems.reduce(
+                (sum, item) => sum + Number(item.price) * item.quantity,
+                0
+            ),
+        [selectedCartItems]
     );
+
+    const selectedItemsCount = useMemo(
+        () => selectedCartItems.reduce((sum, item) => sum + item.quantity, 0),
+        [selectedCartItems]
+    );
+
+    const shippingCost = selectedCartItems.length > 0 ? shippingSelected.price : 0;
+    const totalCost = selectedSubtotal + shippingCost;
+
+    const handleProceedToCheckout = () => {
+        if (selectedItems.length === 0) return;
+        if (typeof window !== "undefined") {
+            localStorage.setItem(
+                checkoutSelectionKey,
+                JSON.stringify(selectedItems)
+            );
+        }
+        router.push("/Checkout");
+    };
 
     return (
         <main>
@@ -219,7 +259,7 @@ export default function Cart() {
                             <div className="flex justify-between pb-6 border-b border-slate-100">
                                 <span className="text-neutral-800 text-2xl font-semibold">Summary</span>
                                 <h2 className="text-2xl text-stone-600 font-semibold">
-                                    {cartItems.reduce((sum, item) => sum + item.quantity, 0)} Items
+                                    {selectedItemsCount} Items
                                 </h2>
                             </div>
 
@@ -227,7 +267,7 @@ export default function Cart() {
                                 <div className="space-y-3">
                                     <div className="flex justify-between pb-6 border-b border-slate-100 text-lg font-semibold">
                                         <span>Subtotal</span>
-                                        <span>৳{subtotal.toFixed(0)}</span>
+                                        <span>৳{selectedSubtotal.toFixed(0)}</span>
                                     </div>
                                     <div className="Coupon-section">
                                         {/* Top Row */}
@@ -269,7 +309,7 @@ export default function Cart() {
                                             </div>
 
                                             {/* Price */}
-                                            <span className="text-lg font-semibold">৳{shippingSelected.price}</span>
+                                            <span className="text-lg font-semibold">৳{shippingCost}</span>
                                         </div>
 
                                         {/* Dropdown Menu */}
@@ -294,18 +334,19 @@ export default function Cart() {
                                     {/* Subtotal */}
                                     <div className="flex justify-between text-lg font-semibold">
                                         <span>Subtotal</span>
-                                        <span>৳{subtotal.toFixed(0)}</span>
+                                        <span>৳{selectedSubtotal.toFixed(0)}</span>
                                     </div>
 
                                     {/* Total Cost (Subtotal + Shipping) */}
                                     <div className="flex justify-between text-lg font-semibold">
                                         <span>Total Cost</span>
-                                        <span>৳{(subtotal + shippingSelected.price).toFixed(0)}</span>
+                                        <span>৳{totalCost.toFixed(0)}</span>
                                     </div>
                                 </div>
                                 <button
                                     className="w-full mt-6 py-4 bg-gray-900 text-white text-lg font-semibold hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed"
                                     disabled={selectedItems.length === 0}
+                                    onClick={handleProceedToCheckout}
                                 >
                                     PROCEED TO CHECKOUT
                                 </button>

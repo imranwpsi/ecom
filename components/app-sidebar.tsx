@@ -6,6 +6,7 @@ import {
   IconDatabase,
   IconFolder,
   IconInnerShadowTop,
+  IconShoppingCart,
 } from "@tabler/icons-react"
 
 
@@ -42,6 +43,11 @@ const data = {
       title: "Products",
       url: "/admin/products",
       icon: IconDatabase,
+    },
+    {
+      title: "Orders",
+      url: "/admin/orders",
+      icon: IconShoppingCart,
     },
   ],
 }
