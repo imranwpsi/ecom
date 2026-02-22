@@ -1,3 +1,5 @@
+"use client"
+
 import Image from 'next/image';
 import { IoCartOutline } from "react-icons/io5";
 // import { BiSolidOffer } from "react-icons/bi";

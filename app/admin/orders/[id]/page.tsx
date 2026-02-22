@@ -18,6 +18,8 @@ import { getOrderById } from "../actions"
 import { ORDER_STATUSES, type OrderStatus } from "../order-status-options"
 import { OrderStatusForm } from "../order-status-form"
 
+export const dynamic = 'force-dynamic';
+
 const statusBadgeClass = (status: string) => {
     switch (status) {
         case "delivered":

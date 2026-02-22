@@ -1,6 +1,6 @@
-import Breadcrumb from "@shared/Breadcrumb";
-import ShopCategory from "@shared/ShopCategory";
-import ShopFilter from "@shared/ShopFilter";
+import Breadcrumb from "@/components/shared/Breadcrumb";
+import ShopCategory from "@/components/shared/ShopCategory";
+import ShopFilter from "@/components/shared/ShopFilter";
 import ProductCard from "@/components/sections/ProductCard";
 import { Product } from "@/types/product";
 const products: Product[] = [
@@ -11,7 +11,7 @@ const products: Product[] = [
       originalPrice: 5000,
       discount: 30,
       image: "/assets/image/just-for-you/Rectangle 19333.png",
-      category: "Best Sellers",
+      category: "Best Sellers", categoryId: 1, description: "Product description",
     },
     {
       id: 2,
@@ -20,7 +20,7 @@ const products: Product[] = [
       originalPrice: 5500,
       discount: 27,
       image: "/assets/image/just-for-you/Rectangle 19333 (1).png",
-      category: "New Arrivals",
+      category: "New Arrivals", categoryId: 1, description: "Product description",
     },
     {
       id: 3,
@@ -29,7 +29,7 @@ const products: Product[] = [
       originalPrice: 6000,
       discount: 25,
       image: "/assets/image/just-for-you/Rectangle 19333 (2).png",
-      category: "Featured",
+      category: "Featured", categoryId: 1, description: "Product description",
     },
     {
       id: 4,
@@ -38,7 +38,7 @@ const products: Product[] = [
       originalPrice: 5200,
       discount: 27,
       image: "/assets/image/just-for-you/Rectangle 19333 (1).png",
-      category: "Best Sellers",
+      category: "Best Sellers", categoryId: 1, description: "Product description",
     },
     {
       id: 5,
@@ -47,7 +47,7 @@ const products: Product[] = [
       originalPrice: 5800,
       discount: 28,
       image: "/assets/image/just-for-you/Rectangle 19333 (1).png",
-      category: "New Arrivals",
+      category: "New Arrivals", categoryId: 1, description: "Product description",
     },
     {
       id: 6,
@@ -56,7 +56,7 @@ const products: Product[] = [
       originalPrice: 4800,
       discount: 25,
       image: "/assets/image/just-for-you/Rectangle 19333 (2).png",
-      category: "Featured",
+      category: "Featured", categoryId: 1, description: "Product description",
     },
     {
       id: 7,
@@ -65,7 +65,7 @@ const products: Product[] = [
       originalPrice: 7000,
       discount: 29,
       image: "/assets/image/just-for-you/Rectangle 19333 (1).png",
-      category: "Best Sellers",
+      category: "Best Sellers", categoryId: 1, description: "Product description",
     },
     {
       id: 8,
@@ -74,7 +74,7 @@ const products: Product[] = [
       originalPrice: 3500,
       discount: 29,
       image: "/assets/image/just-for-you/Rectangle 19333 (2).png",
-      category: "New Arrivals",
+      category: "New Arrivals", categoryId: 1, description: "Product description",
     },
     {
       id: 9,
@@ -83,7 +83,7 @@ const products: Product[] = [
       originalPrice: 5000,
       discount: 30,
       image: "/assets/image/just-for-you/Rectangle 19333.png",
-      category: "Best Sellers",
+      category: "Best Sellers", categoryId: 1, description: "Product description",
     },
     {
       id: 10,
@@ -92,7 +92,7 @@ const products: Product[] = [
       originalPrice: 5500,
       discount: 27,
       image: "/assets/image/just-for-you/Rectangle 19333 (1).png",
-      category: "New Arrivals",
+      category: "New Arrivals", categoryId: 1, description: "Product description",
     },
     {
       id: 11,
@@ -101,7 +101,7 @@ const products: Product[] = [
       originalPrice: 6000,
       discount: 25,
       image: "/assets/image/just-for-you/Rectangle 19333 (2).png",
-      category: "Featured",
+      category: "Featured", categoryId: 1, description: "Product description",
     },
     {
       id: 12,
@@ -110,7 +110,7 @@ const products: Product[] = [
       originalPrice: 5200,
       discount: 27,
       image: "/assets/image/just-for-you/Rectangle 19333 (1).png",
-      category: "Best Sellers",
+      category: "Best Sellers", categoryId: 1, description: "Product description",
     },
   ];
 

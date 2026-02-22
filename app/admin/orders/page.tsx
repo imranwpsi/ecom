@@ -17,6 +17,8 @@ import {
 import Link from "next/link"
 import { getOrders } from "./actions"
 
+export const dynamic = 'force-dynamic';
+
 const statusBadgeClass = (status: string) => {
     switch (status) {
         case "delivered":
